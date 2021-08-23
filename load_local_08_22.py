@@ -54,6 +54,12 @@ v = np.array(pd.read_csv(dirName + adjust_path + 'data/linguistic_property/valen
 a = np.array(pd.read_csv(dirName + adjust_path + 'data/linguistic_property/arousal.csv'))
 c = np.array(pd.read_csv(dirName + adjust_path + 'data/linguistic_property/concreteness.csv'))
 
+errorFrequency = "The frequency of the word in the chosen year is too small to perform this analysis. Please refer to the Frequency Figure to change the year for analysis"
+
+def checkFrequency (wordT,year_i): # if temp < 30, only display return error message
+    temp = kernel_year_freq[voc.index(wordT),][year_i-1800]
+    if temp < 30:
+        print (errorFrequency) 
 
 def load_sparse_csr(filename):
     loader = np.load(filename)
@@ -162,7 +168,9 @@ def closest ( target_w, year_i = 2000, k = 10):
 
     temp = pd.DataFrame(raw_score[0])
     temp.columns=['value']
+    temp = temp[temp.value>0]
     temp.to_csv(dirName + save_path +  'similarity_dist.csv',index= False)
+
     return closeIndex, closeWords,closeScore,raw_score
 
     # [raw_score[voc.index(v)] for v in v.split()] 
@@ -779,6 +787,7 @@ def plot_co_occurence(wordT,contextW,normalize=True):
     else:
         cor_occur=cor_occur/kernel_year_freq[voc_50k.index(wordT),][:,None]
     
+    cor_occur[cor_occur>1]=0 # remove items that have infinitely large value ################
     outputD = pd.DataFrame(cor_occur)
     outputD.columns= contextW
     insert=list(range(1800,2009))
